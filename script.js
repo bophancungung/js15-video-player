@@ -5,7 +5,7 @@ const playBtn = document.getElementById('play-btn');
 const volumeIcon = document.getElementById('volume-icon');
 const volumeRange = document.querySelector('.volume-range');
 const volumeBar = document.querySelector('.volume-bar');
-// player-speed element???
+const speed = document.querySelector('.player-speed');
 const currentTime = document.querySelector('.time-elapsed');
 const duration = document.querySelector('.time-duration');
 const fullscreenBtn = document.getElementById('fullscreen-btn');
@@ -56,6 +56,22 @@ function setProgress(e) {
 }
 
 // Volume Controls --------------------------- //
+let lastVolume = 1;
+
+// Change volume icon
+function changeVolumeIcon(volume) {
+  volumeIcon.className = '';
+  volumeIcon.setAttribute('title', 'Mute');
+  if (volume > 0.7) {
+    volumeIcon.classList.add('fas', 'fa-volume-up');
+  } else if (volume < 0.7 && volume > 0) {
+    volumeIcon.classList.add('fas', 'fa-volume-down');
+  } else if (volume === 0) {
+    volumeIcon.classList.add('fas', 'fa-volume-off');
+    volumeIcon.setAttribute('title', 'Unmute');
+  }
+}
+// Volume bar
 function changeVolume(e) {
   let volume = e.offsetX / volumeRange.offsetWidth;
   volume < 0.1 ? volume = 0 : volume;
@@ -63,19 +79,29 @@ function changeVolume(e) {
   video.volume = volume;
   volumeBar.style.width = `${volume * 100}%`;
   // Change volume icon
-  volumeIcon.className = '';
-  if (volume > 0.7) {
-    volumeIcon.classList.add('fas', 'fa-volume-up');
-  } else if (volume < 0.7 && volume > 0) {
-    volumeIcon.classList.add('fas', 'fa-volume-down');
-  } else if (volume === 0) {
-    volumeIcon.classList.add('fas', 'fa-volume-off');
+  changeVolumeIcon(volume);
+  lastVolume = volume;
+}
+
+// Mute or Unmute
+function toggleMute() {
+  if (video.volume) {
+    lastVolume = video.volume;
+    video.volume = 0;
+    volumeBar.style.width = 0;
+    volumeIcon
+  } else {
+    video.volume = lastVolume;
+    volumeBar.style.width = `${lastVolume * 100}%`;
   }
+  changeVolumeIcon(video.volume);
 }
 
 
 // Change Playback Speed -------------------- //
-
+function changeSpeed() {
+  video.playbackRate = speed.value;
+}
 
 
 // Fullscreen ------------------------------- //
@@ -90,3 +116,5 @@ video.addEventListener('canplay', updateProgress);
 video.addEventListener('ended', () => {showPlayIcon(false)});
 progressRange.addEventListener('click', setProgress);
 volumeRange.addEventListener('click', changeVolume);
+volumeIcon.addEventListener('click', toggleMute);
+speed.addEventListener('change', changeSpeed);
